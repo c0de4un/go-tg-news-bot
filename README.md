@@ -24,3 +24,23 @@ To start in debug mode, run:
 ```shell
 go run ./cmd/bot/bot.go
 ```
+
+### Contribution
+
+### Database:
+We are using Goose as DB migrations utility `https://github.com/pressly/goose`
+
+To create new migration, use:
+```sh
+goose -dir db/migrations create new_user_table sql
+```
+
+To apply new migration, use:
+```sh
+goose -dir db/migrations postgres "postgresql://goose:password@127.0.0.1:5432/go_migrations?sslmode=disable" up
+```
+
+To rollback, use command:
+```sh
+goose -dir /db/migrations postgres "postgresql://goose:password@127.0.0.1:5432/go_migrations?sslmode=disable" down-to <VERSION>
+```
