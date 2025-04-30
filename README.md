@@ -1,4 +1,4 @@
-# go-news-tg-bot
+# go-tg-news-bot
 
 Telegram bot for news with clients and users.
 
