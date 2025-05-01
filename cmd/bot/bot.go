@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	database "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/databse"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"os"
 	"os/signal"
@@ -12,6 +13,11 @@ import (
 
 func main() {
 	cfg, err := tg.LoadTelegramConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	err = database.InitializeDB()
 	if err != nil {
 		panic(err)
 	}
@@ -25,10 +31,10 @@ func main() {
 	}
 
 	b, err := bot.New(cfg.Token, opts...)
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 	if err != nil {
 		panic(err)
 	}
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 
 	b.Start(ctx)
 }
