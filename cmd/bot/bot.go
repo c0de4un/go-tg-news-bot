@@ -10,6 +10,7 @@ import (
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func main() {
@@ -78,6 +79,10 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("start handler failed: %v", err)
 		}
 	} else {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		user, err = ur.Create(ctx, userId, username)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
 			Text:   fmt.Sprintf("Welcome, %s", username),
@@ -85,13 +90,5 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if err != nil {
 			fmt.Printf("start handler failed: %v", err)
 		}
-	}
-
-	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatId,
-		Text:   fmt.Sprintf("Welcome %s, you id is %v", username, userId),
-	})
-	if err != nil {
-		fmt.Printf("start handler failed: %v", err)
 	}
 }
