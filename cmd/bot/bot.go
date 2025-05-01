@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	database "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/databse"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func main() {
@@ -16,8 +19,15 @@ func main() {
 		panic(err)
 	}
 
+	err = database.InitializeDB()
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
+
+	repositories.InitializeUserRepository()
 
 	opts := []bot.Option{
 		bot.WithDefaultHandler(handler),
@@ -25,10 +35,10 @@ func main() {
 	}
 
 	b, err := bot.New(cfg.Token, opts...)
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 	if err != nil {
 		panic(err)
 	}
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 
 	b.Start(ctx)
 }
@@ -49,12 +59,36 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	username := update.Message.From.Username
 	chatId := update.Message.Chat.ID
 
-	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatId,
-		Text:   fmt.Sprintf("Welcome %s, you id is %v", username, userId),
-	})
-
+	ur := repositories.GetUserRepository()
+	user, err := ur.GetUserByTelegramID(userId)
 	if err != nil {
-		fmt.Printf("start handler failed: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Error, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed: %v", err)
+		}
+	}
+	if user != nil {
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   fmt.Sprintf("Welcome back, %s", user.TelegramUsername),
+		})
+		if err != nil {
+			fmt.Printf("start handler failed: %v", err)
+		}
+	} else {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		user, err = ur.Create(ctx, userId, username)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   fmt.Sprintf("Welcome, %s", username),
+		})
+		if err != nil {
+			fmt.Printf("start handler failed: %v", err)
+		}
 	}
 }
