@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Connection>
+    <Host>localhost</Host>
+    <Port>5432</Port>
+    <User>postgres</User>
+    <Password>password</Password>
+    <DB>newsbot</DB>
+</Connection>

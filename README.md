@@ -37,7 +37,7 @@ goose -dir db/migrations create new_user_table sql
 
 To apply new migration, use:
 ```sh
-goose -dir db/migrations postgres "postgresql://goose:password@127.0.0.1:5432/go_migrations?sslmode=disable" up
+goose -dir db/migrations postgres "postgresql://postgres:password@127.0.0.1:5432/newsbot?sslmode=disable" up
 ```
 
 To rollback, use command:
