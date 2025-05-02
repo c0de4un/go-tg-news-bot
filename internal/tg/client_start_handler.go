@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/go-telegram/ui/keyboard/inline"
+	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
 	"time"
 )
@@ -67,8 +69,8 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	if uc == nil {
 		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
 	} else {
-		uc.State = 0
-		err = ucr.SetState(ctx, uc.ID, 0)
+		uc.State = newsmodels.CHAT_STATE_POST_WELCOME
+		err = ucr.SetState(ctx, uc.ID, newsmodels.CHAT_STATE_POST_WELCOME)
 	}
 	if err != nil {
 		fmt.Printf("start handler failed to save user-chat record in db: %v", err)
@@ -81,5 +83,40 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		}
 	}
 
-	// @TODO: Render Menu
+	kb := inline.New(b).
+		Row().
+		Button("Create post", []byte("1-1"), onInlineKeyboardSelect)
+
+	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:      update.Message.Chat.ID,
+		Text:        "Menu",
+		ReplyMarkup: kb,
+	})
+	if err != nil {
+		fmt.Printf("start handler failed to save user-chat record in db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
+	}
+}
+
+func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage, data []byte) {
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: mes.Message.Chat.ID,
+		Text:   "You selected: " + string(data),
+	})
+	if err != nil {
+		fmt.Printf("onInlineKeyboardSelect: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: mes.Message.Chat.ID,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("onInlineKeyboardSelect: %v", err)
+		}
+	}
 }
