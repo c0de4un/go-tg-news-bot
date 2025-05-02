@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	database "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/databse"
@@ -31,7 +30,7 @@ func main() {
 	repositories.InitializeClientRepository()
 
 	opts := []bot.Option{
-		bot.WithDefaultHandler(handler),
+		bot.WithDefaultHandler(tg.DefaultHandler),
 		bot.WithDebug(),
 	}
 
@@ -42,17 +41,6 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 
 	b.Start(ctx)
-}
-
-func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   update.Message.Text,
-	})
-
-	if err != nil {
-		fmt.Printf("default tg handler failed: %v", err)
-	}
 }
 
 func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
