@@ -40,7 +40,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		user, err = ur.Create(ctx, userId, username)
+		user, err = ur.Create(ctx, userId, username, newsmodels.USER_ROLE_CLIENT)
 		if err != nil {
 			fmt.Printf("start handler failed: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -52,6 +52,8 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 			}
 		}
 	}
+
+	// @TODO: Register Client
 
 	ucr := repositories.GetUserChatRepository()
 	uc, err := ucr.GetUserChat(user.ID, chatId)

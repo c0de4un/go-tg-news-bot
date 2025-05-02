@@ -52,6 +52,7 @@ func (ur *UserRepository) GetUserByTelegramID(telegramID int64) (*models.UserMod
 		&user.UUID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.Role,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -65,7 +66,7 @@ func (ur *UserRepository) GetUserByTelegramID(telegramID int64) (*models.UserMod
 	return user, nil
 }
 
-func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username string) (*models.UserModel, error) {
+func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username string, role int64) (*models.UserModel, error) {
 	dbm, _ := database.GetDBManager()
 	if dbm == nil {
 		fmt.Println("UserRepository.Create: dbm is nil, maybe app is terminating")
@@ -82,9 +83,10 @@ func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username
             telegram_id,
             uuid,
             created_at,
-            updated_at
-        ) VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, telegram_username, telegram_id, uuid, created_at, updated_at`
+            updated_at,
+            role
+        ) VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, telegram_username, telegram_id, uuid, created_at, updated_at, role`
 
 	user := &models.UserModel{}
 	err := db.QueryRowContext(ctx, query,
@@ -93,6 +95,7 @@ func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username
 		newUUID,
 		now,
 		now,
+		role,
 	).Scan(
 		&user.ID,
 		&user.TelegramUsername,
@@ -100,6 +103,7 @@ func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username
 		&user.UUID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.Role,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
