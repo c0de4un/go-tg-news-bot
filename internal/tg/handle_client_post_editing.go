@@ -7,6 +7,6 @@ import (
 	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 )
 
-func handlePostCreateStart(user *newsmodels.UserModel, ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage) {
+func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel, c *newsmodels.ClientModel, ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage) {
 	// @TODO: handlePostCreateStart()
 }

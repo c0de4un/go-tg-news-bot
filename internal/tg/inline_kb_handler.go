@@ -26,8 +26,34 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 		}
 	}
 
+	cr := repositories.GetClientRepository()
+	c, err := cr.GetClientByUserID(user.ID)
+	if err != nil {
+		fmt.Printf("start handler failed to retrieve client from db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
+	}
+
+	ucr := repositories.GetUserChatRepository()
+	uc, err := ucr.GetUserChat(user.ID, chatId)
+	if err != nil {
+		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed to register, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
+	}
+
 	if cmdKey == "1-1" {
-		handlePostCreateStart(user, ctx, b, mes)
+		handlePostCreateStart(user, uc, c, ctx, b, mes)
 		return
 	}
 
