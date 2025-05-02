@@ -32,7 +32,20 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	// @TODO: Get Post in Draft state or Create new one
+	pr := repositories.GetPostRepository()
+	post, err := pr.GetPostByUserAndStatus(user.ID, models2.POST_STATUS_DRAFT)
+	if err != nil {
+		fmt.Printf("DefaultHandler: failed to retrieve post, with error: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+		}
+
+		return
+	}
 
 	// Title prompt
 	if user.Chat.State == models2.CHAT_STATE_POST_TITLE {
