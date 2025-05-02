@@ -115,3 +115,25 @@ func (ur *UserRepository) Create(ctx context.Context, telegramID int64, username
 
 	return user, nil
 }
+
+func (ur *UserRepository) GetUserWithRelations(telegramID int64) (*models.UserModel, error) {
+	user, err := ur.GetUserByTelegramID(telegramID)
+	if err != nil {
+		fmt.Printf("UserRepository.GetUserWithRelations: %v", err)
+		return user, err
+	}
+
+	ucr := GetUserChatRepository()
+	user.Chat, err = ucr.GetUserChat(user.ID)
+	if err != nil {
+		fmt.Printf("UserRepository.GetUserWithRelations: %v", err)
+	}
+
+	cr := GetClientRepository()
+	user.Client, err = cr.GetClientByUserID(user.ID)
+	if err != nil {
+		fmt.Printf("UserRepository.GetUserWithRelations: %v", err)
+	}
+
+	return user, nil
+}

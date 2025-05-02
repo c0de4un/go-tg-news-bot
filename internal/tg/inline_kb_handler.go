@@ -40,7 +40,7 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 	}
 
 	ucr := repositories.GetUserChatRepository()
-	uc, err := ucr.GetUserChat(user.ID, chatId)
+	uc, err := ucr.GetUserChat(user.ID)
 	if err != nil {
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
