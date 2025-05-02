@@ -2,6 +2,12 @@ package models
 
 import "time"
 
+const (
+	POST_STATUS_DRAFT      = 0
+	POST_STATUS_MODERATION = 1
+	POST_STATUS_PUBLISHED  = 2
+)
+
 type PostModel struct {
 	ID          int64     `db:"id"`
 	Title       string    `db:"title"`

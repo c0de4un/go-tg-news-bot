@@ -61,7 +61,20 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			return
 		}
 
-		// @TODO: Change Chat state to Body input
+		err = pr.SetTitle(ctx, post.ID, update.Message.Text)
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
+			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Failed, try again later",
+			})
+			if err != nil {
+				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+			}
+
+			return
+		}
+
 		err = ucr.SetState(ctx, user.Chat.ID, models2.CHAT_STATE_POST_BODY)
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
