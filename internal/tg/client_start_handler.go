@@ -67,7 +67,8 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	if uc == nil {
 		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
 	} else {
-		// @TODO: Reset User-Chat State
+		uc.State = 0
+		err = ucr.SetState(ctx, uc.ID, 0)
 	}
 	if err != nil {
 		fmt.Printf("start handler failed to save user-chat record in db: %v", err)

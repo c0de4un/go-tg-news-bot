@@ -109,3 +109,23 @@ func (ucr *UserChatRepository) CreateUserChat(ctx context.Context, userID int64,
 
 	return uc, nil
 }
+
+func (ucr *UserChatRepository) SetState(ctx context.Context, userChatID int64, state int64) error {
+	dbm, _ := database.GetDBManager()
+	if dbm == nil {
+		fmt.Println("UserChatRepository.CreateUserChat: dbm is nil, maybe app is terminating")
+		return fmt.Errorf("UserChatRepository.CreateUserChat: dbm is nil, maybe app is terminating")
+	}
+	db := dbm.GetDBConnection()
+
+	query := `
+        UPDATE user_chats
+        SET state = $1
+        WHERE id = $2;`
+	_, err := db.ExecContext(ctx, query,
+		state,
+		userChatID,
+	)
+
+	return err
+}
