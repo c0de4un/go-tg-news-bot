@@ -28,6 +28,7 @@ func main() {
 
 	repositories.InitializeUserRepository()
 	repositories.InitializeUserChatRepository()
+	repositories.InitializeClientRepository()
 
 	opts := []bot.Option{
 		bot.WithDefaultHandler(handler),

@@ -53,7 +53,32 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		}
 	}
 
-	// @TODO: Register Client
+	cr := repositories.GetClientRepository()
+	c, err := cr.GetClientByUserID(user.ID)
+	if err != nil {
+		fmt.Printf("start handler failed to retrieve client from db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
+	}
+
+	if c == nil {
+		c, err = cr.Create(ctx, user.ID)
+	}
+	if err != nil {
+		fmt.Printf("start handler failed to create client in db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
+	}
 
 	ucr := repositories.GetUserChatRepository()
 	uc, err := ucr.GetUserChat(user.ID, chatId)

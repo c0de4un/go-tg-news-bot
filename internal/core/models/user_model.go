@@ -3,9 +3,9 @@ package models
 import "time"
 
 const (
-	USER_ROLE_CLIENT = 1
+	USER_ROLE_CLIENT = 0
+	USER_ROLE_GUEST  = 1
 	USER_ROLE_ADMIN  = 2
-	USER_ROLE_GUEST  = 3
 )
 
 type UserModel struct {
