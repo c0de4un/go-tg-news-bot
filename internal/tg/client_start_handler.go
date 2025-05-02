@@ -54,7 +54,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	ucr := repositories.GetUserChatRepository()
 	uc, err := ucr.GetUserChat(user.ID, chatId)
 	if err != nil {
-		fmt.Printf("start handler failed to retrieve user-char record from db: %v", err)
+		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
 			Text:   "Failed to register, try again later",
@@ -65,9 +65,19 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	}
 
 	if uc == nil {
-		// @TODO: Create new User-Chat
+		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
 	} else {
 		// @TODO: Reset User-Chat State
+	}
+	if err != nil {
+		fmt.Printf("start handler failed to save user-chat record in db: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Failed, try again later",
+		})
+		if err != nil {
+			fmt.Printf("start handler failed to send error-message: %v", err)
+		}
 	}
 
 	// @TODO: Render Menu
