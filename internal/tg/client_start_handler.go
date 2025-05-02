@@ -130,20 +130,3 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		}
 	}
 }
-
-func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage, data []byte) {
-	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: mes.Message.Chat.ID,
-		Text:   "You selected: " + string(data),
-	})
-	if err != nil {
-		fmt.Printf("onInlineKeyboardSelect: %v", err)
-		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: mes.Message.Chat.ID,
-			Text:   "Failed, try again later",
-		})
-		if err != nil {
-			fmt.Printf("onInlineKeyboardSelect: %v", err)
-		}
-	}
-}
