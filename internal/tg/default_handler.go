@@ -49,10 +49,25 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	// Title prompt
 	if user.Chat.State == models2.CHAT_STATE_POST_TITLE {
-		if len(update.Message.Text) < 3 {
+		ln := len(update.Message.Text)
+		if ln < 3 || ln > 254 {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
 				Text:   "Invalid title",
+			})
+			if err != nil {
+				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+			}
+
+			return
+		}
+
+		post, err := pr.Create(ctx, user.ID)
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to create new post, with error: %v", err)
+			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Failed, try again later",
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -89,12 +104,62 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			return
 		}
 
+		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Enter main text",
+		})
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+		}
+
 		return
 	}
 
 	if user.Chat.State == models2.CHAT_STATE_POST_BODY {
-		// @TODO: Validate Body
-		// @TODO: Reset Chat-State
-		// @TODO: Change Post state to Published
+		ln := len(update.Message.Text)
+		if ln < 3 || ln > 10000 {
+			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Invalid content",
+			})
+			if err != nil {
+				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+			}
+
+			return
+		}
+
+		err = pr.SetBodyWithState(ctx, post.ID, update.Message.Text, models2.POST_STATUS_PUBLISHED)
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to set post body, with error: %v", err)
+			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Failed, try again later",
+			})
+			if err != nil {
+				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+			}
+
+			return
+		}
+
+		err = ucr.SetState(ctx, user.Chat.ID, models2.CHAT_STATE_POST_WELCOME)
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
+			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "Failed, try again later",
+			})
+			if err != nil {
+				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
+			}
+
+			return
+		}
+
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Published !",
+		})
 	}
 }

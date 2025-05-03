@@ -6,13 +6,27 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"strconv"
+	"strings"
 )
 
 func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage, data []byte) {
-	cmdKey := string(data)
+	dataParts := strings.Split(string(data), ";")
+	cmdKey := dataParts[0]
 
-	userId := mes.Message.From.ID
 	chatId := mes.Message.Chat.ID
+	userId, err := strconv.ParseInt(dataParts[1], 10, 64)
+	if err != nil {
+		fmt.Printf("onInlineKeyboardSelect: %v", err)
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   "Error, try again later",
+		})
+		if err != nil {
+			fmt.Printf("onInlineKeyboardSelect: %v", err)
+		}
+	}
+
 	ur := repositories.GetUserRepository()
 	user, err := ur.GetUserByTelegramID(userId)
 	if err != nil {
@@ -24,6 +38,11 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 		if err != nil {
 			fmt.Printf("onInlineKeyboardSelect: %v", err)
 		}
+	}
+
+	if user == nil {
+		fmt.Printf("onInlineKeyboardSelect: user not found for tg-id %v", userId)
+		return
 	}
 
 	cr := repositories.GetClientRepository()

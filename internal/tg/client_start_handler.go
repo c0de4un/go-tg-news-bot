@@ -112,7 +112,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 
 	kb := inline.New(b).
 		Row().
-		Button("Create post", []byte("1-1"), onInlineKeyboardSelect)
+		Button("Create post", []byte(fmt.Sprintf("1-1;%d", userId)), onInlineKeyboardSelect)
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      update.Message.Chat.ID,
