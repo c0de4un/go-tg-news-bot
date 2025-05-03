@@ -16,4 +16,6 @@ type UserModel struct {
 	CreatedAt        time.Time `db:"created_at"`
 	UpdatedAt        time.Time `db:"updated_at"`
 	Role             int64     `db:"role"`
+	Client           *ClientModel
+	Chat             *ChatModel
 }

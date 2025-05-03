@@ -81,7 +81,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	}
 
 	ucr := repositories.GetUserChatRepository()
-	uc, err := ucr.GetUserChat(user.ID, chatId)
+	uc, err := ucr.GetUserChat(user.ID)
 	if err != nil {
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -112,7 +112,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 
 	kb := inline.New(b).
 		Row().
-		Button("Create post", []byte("1-1"), onInlineKeyboardSelect)
+		Button("Create post", []byte(fmt.Sprintf("1-1;%d", userId)), onInlineKeyboardSelect)
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      update.Message.Chat.ID,
@@ -127,23 +127,6 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
-		}
-	}
-}
-
-func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage, data []byte) {
-	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: mes.Message.Chat.ID,
-		Text:   "You selected: " + string(data),
-	})
-	if err != nil {
-		fmt.Printf("onInlineKeyboardSelect: %v", err)
-		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: mes.Message.Chat.ID,
-			Text:   "Failed, try again later",
-		})
-		if err != nil {
-			fmt.Printf("onInlineKeyboardSelect: %v", err)
 		}
 	}
 }

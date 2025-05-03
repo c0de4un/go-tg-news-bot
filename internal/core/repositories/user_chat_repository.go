@@ -29,7 +29,7 @@ func GetUserChatRepository() *UserChatRepository {
 	return userChatRepositoryInstance
 }
 
-func (ucr *UserChatRepository) GetUserChat(userID int64, chatID int64) (*models.ChatModel, error) {
+func (ucr *UserChatRepository) GetUserChat(userID int64) (*models.ChatModel, error) {
 	dbm, _ := database.GetDBManager()
 	if dbm == nil {
 		fmt.Println("UserChatRepository.GetUserChat: dbm is nil, maybe app is terminating")
@@ -40,11 +40,10 @@ func (ucr *UserChatRepository) GetUserChat(userID int64, chatID int64) (*models.
 	query := `
         SELECT *
         FROM user_chats 
-        WHERE user_id = $1
-        AND chat_id = $2`
+        WHERE user_id = $1`
 
 	uc := &models.ChatModel{}
-	err := db.QueryRow(query, userID, chatID).Scan(
+	err := db.QueryRow(query, userID).Scan(
 		&uc.ID,
 		&uc.UserID,
 		&uc.ChatID,
