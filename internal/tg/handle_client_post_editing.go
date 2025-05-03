@@ -7,6 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 )
 
 func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel, c *newsmodels.ClientModel, ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage) {
@@ -18,7 +19,7 @@ func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel,
 		fmt.Printf("handlePostCreateStart: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: mes.Message.Chat.ID,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Failed, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("handlePostCreateStart: %v", err)
@@ -29,7 +30,7 @@ func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel,
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: mes.Message.Chat.ID,
-		Text:   "Please, enter post title",
+		Text:   services.Translate("Please, enter post title"),
 	})
 	if err != nil {
 		fmt.Printf("handlePostCreateStart: %v", err)

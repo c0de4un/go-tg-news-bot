@@ -6,6 +6,7 @@ import (
 	"github.com/go-telegram/bot/models"
 	database "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/databse"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"os"
 	"os/signal"
@@ -29,6 +30,7 @@ func main() {
 	repositories.InitializeUserChatRepository()
 	repositories.InitializeClientRepository()
 	repositories.InitializePostRepository()
+	services.InitializeTranslateService()
 
 	opts := []bot.Option{
 		bot.WithDefaultHandler(tg.DefaultHandler),

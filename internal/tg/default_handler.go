@@ -7,6 +7,7 @@ import (
 	"github.com/go-telegram/bot/models"
 	models2 "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 )
 
 func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -17,7 +18,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		fmt.Printf("DefaultHandler: failed to retrieve user with error %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Failed, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -38,7 +39,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		fmt.Printf("DefaultHandler: failed to retrieve post, with error: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Failed, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -53,7 +54,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if ln < 3 || ln > 254 {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Invalid title",
+				Text:   services.Translate("Invalid title"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -67,7 +68,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("DefaultHandler: failed to create new post, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Failed, try again later",
+				Text:   services.Translate("Failed, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -81,7 +82,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Failed, try again later",
+				Text:   services.Translate("Failed, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -95,7 +96,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Failed, try again later",
+				Text:   services.Translate("Failed, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -106,7 +107,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Enter main text",
+			Text:   services.Translate("Enter main text"),
 		})
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -120,7 +121,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if ln < 3 || ln > 10000 {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Invalid content",
+				Text:   services.Translate("Invalid content"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -134,7 +135,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("DefaultHandler: failed to set post body, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Failed, try again later",
+				Text:   services.Translate("Failed, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -148,7 +149,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
-				Text:   "Failed, try again later",
+				Text:   services.Translate("Failed, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
@@ -159,7 +160,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Published !",
+			Text:   services.Translate("Published"),
 		})
 	}
 }
