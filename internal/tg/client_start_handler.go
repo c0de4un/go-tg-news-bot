@@ -8,6 +8,7 @@ import (
 	"github.com/go-telegram/ui/keyboard/inline"
 	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		fmt.Printf("start handler failed: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Error, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed: %v", err)
@@ -31,7 +32,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	if user != nil {
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   fmt.Sprintf("Welcome back, %s", user.TelegramUsername),
+			Text:   fmt.Sprintf(services.Translate("Welcome back, %s"), user.TelegramUsername),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed: %v", err)
@@ -45,7 +46,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 			fmt.Printf("start handler failed: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: chatId,
-				Text:   "Failed to register, try again later",
+				Text:   services.Translate("Error, try again later"),
 			})
 			if err != nil {
 				fmt.Printf("start handler failed to send error-message: %v", err)
@@ -59,7 +60,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		fmt.Printf("start handler failed to retrieve client from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
@@ -73,7 +74,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		fmt.Printf("start handler failed to create client in db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
@@ -86,7 +87,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Failed to register, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
@@ -103,7 +104,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		fmt.Printf("start handler failed to save user-chat record in db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
@@ -112,18 +113,18 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 
 	kb := inline.New(b).
 		Row().
-		Button("Create post", []byte(fmt.Sprintf("1-1;%d", userId)), onInlineKeyboardSelect)
+		Button(services.Translate("Create post"), []byte(fmt.Sprintf("1-1;%d", userId)), onInlineKeyboardSelect)
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      update.Message.Chat.ID,
-		Text:        "Menu",
+		Text:        services.Translate("Menu"),
 		ReplyMarkup: kb,
 	})
 	if err != nil {
 		fmt.Printf("start handler failed to save user-chat record in db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatId,
-			Text:   "Failed, try again later",
+			Text:   services.Translate("Error, try again later"),
 		})
 		if err != nil {
 			fmt.Printf("start handler failed to send error-message: %v", err)
