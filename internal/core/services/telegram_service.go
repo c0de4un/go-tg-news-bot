@@ -14,6 +14,7 @@ import (
 type TelegramService struct {
 	editBot *bot.Bot
 	readBot *bot.Bot
+	adminID int64
 }
 
 var (
@@ -21,17 +22,26 @@ var (
 	telegramServiceInstance *TelegramService
 )
 
-func InitializeTelegramService(editBot *bot.Bot, readBot *bot.Bot) {
+func InitializeTelegramService(
+	editBot *bot.Bot,
+	readBot *bot.Bot,
+	adminID int64,
+) {
 	telegramServiceOnce.Do(func() {
 		telegramServiceInstance = &TelegramService{
 			editBot: editBot,
 			readBot: readBot,
+			adminID: adminID,
 		}
 	})
 }
 
 func GetTelegramService() *TelegramService {
 	return telegramServiceInstance
+}
+
+func (ts *TelegramService) IsAdmin(tgID int64) bool {
+	return tgID == ts.adminID
 }
 
 func (ts *TelegramService) PublishPost(post *models.PostModel) {
