@@ -54,6 +54,20 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		}
 	}
 
+	// Check if Admin
+	ts := services.GetTelegramService()
+	if user.Role != newsmodels.USER_ROLE_ADMIN && ts.IsAdmin(user.TelegramID) {
+		_ = ur.SetRole(context.Background(), user.ID, newsmodels.USER_ROLE_ADMIN)
+		user.Role = newsmodels.USER_ROLE_ADMIN
+	}
+
+	if ts.IsAdmin(user.TelegramID) {
+		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatId,
+			Text:   services.Translate("Welcome back, Admin"),
+		})
+	}
+
 	cr := repositories.GetClientRepository()
 	c, err := cr.GetClientByUserID(user.ID)
 	if err != nil {

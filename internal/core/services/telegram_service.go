@@ -18,7 +18,7 @@ type TelegramService struct {
 }
 
 var (
-	telegramServiceOnce     *sync.Once
+	telegramServiceOnce     sync.Once
 	telegramServiceInstance *TelegramService
 )
 
