@@ -11,8 +11,6 @@ import (
 )
 
 func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel, c *newsmodels.ClientModel, ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage) {
-	// @TODO: handlePostCreateStart()
-
 	ucr := repositories.GetUserChatRepository()
 	err := ucr.SetState(ctx, uc.ID, newsmodels.CHAT_STATE_POST_TITLE)
 	if err != nil {

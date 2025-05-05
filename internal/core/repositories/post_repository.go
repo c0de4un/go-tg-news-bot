@@ -161,3 +161,68 @@ func (pr *PostRepository) SetBodyWithState(ctx context.Context, postID int64, bo
 
 	return err
 }
+
+func (pr *PostRepository) ListLastPosts(offset, limit int, status int64) ([]*models.PostModel, error) {
+	dbm, _ := database.GetDBManager()
+	if dbm == nil {
+		fmt.Println("PostRepository.ListPosts: dbm is nil, maybe app is terminating")
+		return nil, fmt.Errorf("database manager not available")
+	}
+	db := dbm.GetDBConnection()
+
+	query := `
+        SELECT 
+            id,
+            title,
+            body,
+            status,
+            created_by,
+            created_at,
+            updated_at,
+            deleted_at
+        FROM posts
+        WHERE status = $1
+        ORDER BY created_at DESC
+        OFFSET $2
+        LIMIT $3`
+
+	rows, err := db.Query(query, status, offset, limit)
+	if err != nil {
+		fmt.Printf("PostRepository.ListPosts: query error: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
+
+	var posts []*models.PostModel
+
+	for rows.Next() {
+		post := &models.PostModel{}
+		err := rows.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Body,
+			&post.Status,
+			&post.CreatedBy,
+			&post.CreatedAt,
+			&post.UpdatedAt,
+			&post.DeletedAt,
+		)
+		if err != nil {
+			fmt.Printf("PostRepository.ListPosts: scan error: %v\n", err)
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		fmt.Printf("PostRepository.ListPosts: rows error: %v\n", err)
+		return nil, err
+	}
+
+	return posts, nil
+}

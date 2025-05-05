@@ -18,4 +18,5 @@ type UserModel struct {
 	Role             int64     `db:"role"`
 	Client           *ClientModel
 	Chat             *ChatModel
+	ChatID           int64
 }
