@@ -162,5 +162,8 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			ChatID: update.Message.Chat.ID,
 			Text:   services.Translate("Published"),
 		})
+
+		ts := services.GetTelegramService()
+		go ts.PublishPost(post)
 	}
 }

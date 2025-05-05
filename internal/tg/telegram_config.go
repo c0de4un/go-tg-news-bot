@@ -8,8 +8,9 @@ import (
 )
 
 type TelegramConfig struct {
-	XMLName xml.Name `xml:"TelegramConfig"`
-	Token   string   `xml:"Token"`
+	XMLName     xml.Name `xml:"TelegramConfig"`
+	EditorToken string   `xml:"EditorToken"`
+	ReaderToken string   `xml:"ReaderToken"`
 }
 
 func LoadTelegramConfig() (*TelegramConfig, error) {

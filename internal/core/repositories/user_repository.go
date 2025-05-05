@@ -31,6 +31,71 @@ func GetUserRepository() *UserRepository {
 	return userRepositoryInstance
 }
 
+func (ur *UserRepository) ListUsers(offset, limit int) ([]*models.UserModel, error) {
+	dbm, _ := database.GetDBManager()
+	if dbm == nil {
+		fmt.Println("UserRepository.ListUsers: dbm is nil, maybe app is terminating")
+		return nil, fmt.Errorf("database manager not available")
+	}
+	db := dbm.GetDBConnection()
+
+	query := `
+        SELECT 
+            id,
+            telegram_username,
+            telegram_id,
+            uuid,
+            created_at,
+            updated_at,
+            role,
+            user_chats.chat_id
+        FROM users
+        JOIN user_chats ON user_id = users.id
+        ORDER BY created_at DESC
+        OFFSET $1
+        LIMIT $2`
+
+	rows, err := db.Query(query, offset, limit)
+	if err != nil {
+		fmt.Printf("UserRepository.ListUsers: query error: %v\n", err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
+
+	var users []*models.UserModel
+
+	for rows.Next() {
+		user := &models.UserModel{}
+		err := rows.Scan(
+			&user.ID,
+			&user.TelegramUsername,
+			&user.TelegramID,
+			&user.UUID,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&user.Role,
+			&user.ChatID,
+		)
+		if err != nil {
+			fmt.Printf("UserRepository.ListUsers: scan error: %v\n", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		fmt.Printf("UserRepository.ListUsers: rows error: %v\n", err)
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (ur *UserRepository) GetUserByTelegramID(telegramID int64) (*models.UserModel, error) {
 	dbm, _ := database.GetDBManager()
 	if dbm == nil {

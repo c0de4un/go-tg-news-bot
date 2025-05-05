@@ -37,13 +37,26 @@ func main() {
 		bot.WithDebug(),
 	}
 
-	b, err := bot.New(cfg.Token, opts...)
+	editBot, err := bot.New(cfg.EditorToken, opts...)
 	if err != nil {
 		panic(err)
 	}
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
+	editBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, startHandler)
 
-	b.Start(ctx)
+	opts = []bot.Option{
+		bot.WithDefaultHandler(tg.ReadBotDefaultHandler),
+		bot.WithDebug(),
+	}
+	readBot, err := bot.New(cfg.ReaderToken, opts...)
+	if err != nil {
+		panic(err)
+	}
+	readBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, tg.ReadBotStartHandler)
+	go readBot.Start(ctx)
+
+	services.InitializeTelegramService(editBot, readBot)
+
+	editBot.Start(ctx)
 }
 
 func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
