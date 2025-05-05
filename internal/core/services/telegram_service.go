@@ -77,6 +77,28 @@ func (ts *TelegramService) sendToUser(
 	})
 	if err != nil {
 		fmt.Printf("TelegramService::sendToUser: failed to send message, error: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (ts *TelegramService) SendLastPostsToUser(
+	user *models.UserModel,
+) error {
+	pr := repositories.GetPostRepository()
+	posts, err := pr.ListLastPosts(0, 5, models.POST_STATUS_PUBLISHED)
+	if err != nil {
+		fmt.Printf("TelegramService::SendLastPostsToUser: %v", err)
+	}
+
+	var duration = time.Duration(1) * time.Second
+	for _, post := range posts {
+		msgTxt := fmt.Sprintf("%s\n\n%s", post.Title, post.Body)
+		_ = ts.sendToUser(user, msgTxt)
+
+		duration = time.Duration(1+rand.Intn(29)) * time.Second
+		time.Sleep(duration)
 	}
 
 	return nil

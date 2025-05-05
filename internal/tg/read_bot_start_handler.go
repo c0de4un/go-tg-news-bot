@@ -63,5 +63,8 @@ func ReadBotStartHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
 	}
 
-	// @TODO: Send up to 5 last posts
+	user.Chat = uc
+
+	ts := services.GetTelegramService()
+	_ = ts.SendLastPostsToUser(user)
 }
