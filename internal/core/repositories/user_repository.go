@@ -202,3 +202,31 @@ func (ur *UserRepository) GetUserWithRelations(telegramID int64) (*models.UserMo
 
 	return user, nil
 }
+
+func (ur *UserRepository) SetRole(ctx context.Context, userID int64, role int64) error {
+	dbm, _ := database.GetDBManager()
+	if dbm == nil {
+		fmt.Println("UserRepository.SetRole: dbm is nil, maybe app is terminating")
+		return fmt.Errorf("database manager not available")
+	}
+	db := dbm.GetDBConnection()
+
+	query := `
+        UPDATE users
+        SET role = $1,
+            updated_at = $2
+        WHERE id = $3`
+
+	_, err := db.ExecContext(ctx, query,
+		role,
+		time.Now().UTC(), // Update timestamp
+		userID,
+	)
+
+	if err != nil {
+		fmt.Printf("UserRepository.SetRole: update error: %v\n", err)
+		return fmt.Errorf("failed to update user role: %w", err)
+	}
+
+	return nil
+}
