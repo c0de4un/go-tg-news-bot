@@ -2,4 +2,5 @@
 <TelegramConfig>
     <EditorToken>TOKEN</EditorToken>
     <ReaderToken>TOKEN</ReaderToken>
+    <AdminID>12345678</AdminID>
 </TelegramConfig>
