@@ -14,7 +14,7 @@ import (
 type TelegramService struct {
 	editBot *bot.Bot
 	readBot *bot.Bot
-	adminID int64
+	cfg     *models.TelegramConfig
 }
 
 var (
@@ -25,13 +25,13 @@ var (
 func InitializeTelegramService(
 	editBot *bot.Bot,
 	readBot *bot.Bot,
-	adminID int64,
+	cfg *models.TelegramConfig,
 ) {
 	telegramServiceOnce.Do(func() {
 		telegramServiceInstance = &TelegramService{
 			editBot: editBot,
 			readBot: readBot,
-			adminID: adminID,
+			cfg:     cfg,
 		}
 	})
 }
@@ -40,8 +40,16 @@ func GetTelegramService() *TelegramService {
 	return telegramServiceInstance
 }
 
+func GetEditBotID() int64 {
+	return telegramServiceInstance.cfg.EditorBotID
+}
+
+func GetReadBotID() int64 {
+	return telegramServiceInstance.cfg.ReaderBotID
+}
+
 func (ts *TelegramService) IsAdmin(tgID int64) bool {
-	return tgID == ts.adminID
+	return tgID == ts.cfg.AdminID
 }
 
 func (ts *TelegramService) PublishPost(post *models.PostModel) {
@@ -81,8 +89,15 @@ func (ts *TelegramService) sendToUser(
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	_, err := ts.readBot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: user.ChatID,
+	ucr := repositories.GetUserChatRepository()
+	uc, err := ucr.GetUserChat(user.ID, models.CHAT_TYPE_READER, GetReadBotID())
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to find user-chat, error: %v", err)
+		return err
+	}
+
+	_, err = ts.readBot.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: uc.ChatID,
 		Text:   msgTxt,
 	})
 	if err != nil {

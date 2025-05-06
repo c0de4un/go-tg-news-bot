@@ -29,7 +29,11 @@ func GetUserChatRepository() *UserChatRepository {
 	return userChatRepositoryInstance
 }
 
-func (ucr *UserChatRepository) GetUserChat(userID int64) (*models.ChatModel, error) {
+func (ucr *UserChatRepository) GetUserChat(
+	userID int64,
+	botType int64,
+	botID int64,
+) (*models.ChatModel, error) {
 	dbm, _ := database.GetDBManager()
 	if dbm == nil {
 		fmt.Println("UserChatRepository.GetUserChat: dbm is nil, maybe app is terminating")
@@ -40,16 +44,20 @@ func (ucr *UserChatRepository) GetUserChat(userID int64) (*models.ChatModel, err
 	query := `
         SELECT *
         FROM user_chats 
-        WHERE user_id = $1`
+        WHERE user_id = $1
+        AND bot_type = $2
+        AND bot_id = $3`
 
 	uc := &models.ChatModel{}
-	err := db.QueryRow(query, userID).Scan(
+	err := db.QueryRow(query, userID, botType, botID).Scan(
 		&uc.ID,
 		&uc.UserID,
 		&uc.ChatID,
 		&uc.State,
 		&uc.CreatedAt,
 		&uc.UpdatedAt,
+		&uc.BotType,
+		&uc.BotID,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -63,7 +71,13 @@ func (ucr *UserChatRepository) GetUserChat(userID int64) (*models.ChatModel, err
 	return uc, nil
 }
 
-func (ucr *UserChatRepository) CreateUserChat(ctx context.Context, userID int64, chatID int64) (*models.ChatModel, error) {
+func (ucr *UserChatRepository) CreateUserChat(
+	ctx context.Context,
+	userID int64,
+	chatID int64,
+	botType int64,
+	botID int64,
+) (*models.ChatModel, error) {
 	dbm, _ := database.GetDBManager()
 	if dbm == nil {
 		fmt.Println("UserChatRepository.CreateUserChat: dbm is nil, maybe app is terminating")
@@ -79,9 +93,11 @@ func (ucr *UserChatRepository) CreateUserChat(ctx context.Context, userID int64,
             chat_id,
             state,
             created_at,
-            updated_at
-        ) VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, user_id, chat_id, state, created_at, updated_at`
+            updated_at,
+            bot_type,
+            bot_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, user_id, chat_id, state, created_at, updated_at, bot_type, bot_id`
 
 	uc := &models.ChatModel{}
 	err := db.QueryRowContext(ctx, query,
@@ -90,6 +106,8 @@ func (ucr *UserChatRepository) CreateUserChat(ctx context.Context, userID int64,
 		0,
 		now,
 		now,
+		botType,
+		botID,
 	).Scan(
 		&uc.ID,
 		&uc.UserID,
@@ -97,6 +115,8 @@ func (ucr *UserChatRepository) CreateUserChat(ctx context.Context, userID int64,
 		&uc.State,
 		&uc.CreatedAt,
 		&uc.UpdatedAt,
+		&uc.BotType,
+		&uc.BotID,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

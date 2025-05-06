@@ -96,7 +96,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	}
 
 	ucr := repositories.GetUserChatRepository()
-	uc, err := ucr.GetUserChat(user.ID)
+	uc, err := ucr.GetUserChat(user.ID, newsmodels.CHAT_TYPE_EDITOR, services.GetEditBotID())
 	if err != nil {
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -109,7 +109,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	}
 
 	if uc == nil {
-		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
+		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId, newsmodels.CHAT_TYPE_EDITOR, services.GetEditBotID())
 	} else {
 		uc.State = newsmodels.CHAT_STATE_POST_WELCOME
 		err = ucr.SetState(ctx, uc.ID, newsmodels.CHAT_STATE_POST_WELCOME)

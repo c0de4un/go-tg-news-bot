@@ -47,7 +47,7 @@ func ReadBotStartHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 	}
 
 	ucr := repositories.GetUserChatRepository()
-	uc, err := ucr.GetUserChat(user.ID)
+	uc, err := ucr.GetUserChat(user.ID, newsmodels.CHAT_TYPE_READER, services.GetReadBotID())
 	if err != nil {
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -60,7 +60,7 @@ func ReadBotStartHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 	}
 
 	if uc == nil {
-		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId)
+		uc, err = ucr.CreateUserChat(ctx, user.ID, chatId, newsmodels.CHAT_TYPE_READER, services.GetReadBotID())
 	}
 
 	user.Chat = uc
