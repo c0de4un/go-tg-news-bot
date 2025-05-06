@@ -28,7 +28,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	// Cancel, if not Client
-	if user.Role != models2.USER_ROLE_CLIENT {
+	if user.Role != models2.USER_ROLE_CLIENT && user.Role != models2.USER_ROLE_ADMIN {
 		fmt.Println("DefaultHandler: not a client, skip")
 		return
 	}
