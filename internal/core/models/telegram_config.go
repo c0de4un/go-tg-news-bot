@@ -1,4 +1,4 @@
-package tg
+package models
 
 import (
 	"encoding/xml"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 	"strconv"
@@ -60,7 +61,7 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 	}
 
 	ucr := repositories.GetUserChatRepository()
-	uc, err := ucr.GetUserChat(user.ID)
+	uc, err := ucr.GetUserChat(user.ID, newsmodels.CHAT_TYPE_EDITOR, services.GetEditBotID())
 	if err != nil {
 		fmt.Printf("start handler failed to retrieve user-chat record from db: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{

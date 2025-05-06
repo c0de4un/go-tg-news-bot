@@ -6,7 +6,6 @@ import (
 	"github.com/go-telegram/bot"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
-	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"math/rand"
 	"sync"
 	"time"
@@ -15,7 +14,7 @@ import (
 type TelegramService struct {
 	editBot *bot.Bot
 	readBot *bot.Bot
-	cfg     *tg.TelegramConfig
+	cfg     *models.TelegramConfig
 }
 
 var (
@@ -26,7 +25,7 @@ var (
 func InitializeTelegramService(
 	editBot *bot.Bot,
 	readBot *bot.Bot,
-	cfg *tg.TelegramConfig,
+	cfg *models.TelegramConfig,
 ) {
 	telegramServiceOnce.Do(func() {
 		telegramServiceInstance = &TelegramService{

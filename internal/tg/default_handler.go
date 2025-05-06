@@ -13,7 +13,7 @@ import (
 func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	ur := repositories.GetUserRepository()
 	ucr := repositories.GetUserChatRepository()
-	user, err := ur.GetUserWithRelations(update.Message.From.ID)
+	user, err := ur.GetUserWithRelations(update.Message.From.ID, models2.CHAT_TYPE_EDITOR, services.GetEditBotID())
 	if err != nil {
 		fmt.Printf("DefaultHandler: failed to retrieve user with error %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{

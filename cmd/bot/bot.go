@@ -5,6 +5,7 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	database "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/databse"
+	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	cfg, err := tg.LoadTelegramConfig()
+	cfg, err := newsmodels.LoadTelegramConfig()
 	if err != nil {
 		panic(err)
 	}
