@@ -6,6 +6,7 @@ import (
 	"github.com/go-telegram/bot"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
+	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/tg"
 	"math/rand"
 	"sync"
 	"time"
@@ -14,7 +15,7 @@ import (
 type TelegramService struct {
 	editBot *bot.Bot
 	readBot *bot.Bot
-	adminID int64
+	cfg     *tg.TelegramConfig
 }
 
 var (
@@ -25,13 +26,13 @@ var (
 func InitializeTelegramService(
 	editBot *bot.Bot,
 	readBot *bot.Bot,
-	adminID int64,
+	cfg *tg.TelegramConfig,
 ) {
 	telegramServiceOnce.Do(func() {
 		telegramServiceInstance = &TelegramService{
 			editBot: editBot,
 			readBot: readBot,
-			adminID: adminID,
+			cfg:     cfg,
 		}
 	})
 }
@@ -40,8 +41,16 @@ func GetTelegramService() *TelegramService {
 	return telegramServiceInstance
 }
 
+func GetEditBotID() int64 {
+	return telegramServiceInstance.cfg.EditorBotID
+}
+
+func GetReadBotID() int64 {
+	return telegramServiceInstance.cfg.ReaderBotID
+}
+
 func (ts *TelegramService) IsAdmin(tgID int64) bool {
-	return tgID == ts.adminID
+	return tgID == ts.cfg.AdminID
 }
 
 func (ts *TelegramService) PublishPost(post *models.PostModel) {

@@ -53,7 +53,7 @@ func main() {
 	}
 	readBot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, tg.ReadBotStartHandler)
 
-	services.InitializeTelegramService(editBot, readBot, cfg.AdminID)
+	services.InitializeTelegramService(editBot, readBot, cfg)
 
 	go readBot.Start(ctx)
 

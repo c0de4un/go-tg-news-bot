@@ -10,7 +10,9 @@ import (
 type TelegramConfig struct {
 	XMLName     xml.Name `xml:"TelegramConfig"`
 	EditorToken string   `xml:"EditorToken"`
+	EditorBotID int64    `xml:"EditorBotID"`
 	ReaderToken string   `xml:"ReaderToken"`
+	ReaderBotID int64    `xml:"ReaderBotID"`
 	AdminID     int64    `xml:"AdminID"`
 }
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TelegramConfig>
     <EditorToken>TOKEN</EditorToken>
+    <EditorBotID>12345678</EditorBotID>
     <ReaderToken>TOKEN</ReaderToken>
+    <ReaderBotID>12345678</ReaderBotID>
     <AdminID>12345678</AdminID>
 </TelegramConfig>
