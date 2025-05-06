@@ -14,3 +14,7 @@
 "Введите основной текст"
 "Create post"
 "Добавить пост"
+"Sent to moderation"
+"Отправлено на модерацию"
+"New post added to moderation [from %s]: %s"
+"Новый пост на модерации [от %s]: %s"

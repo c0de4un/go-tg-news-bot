@@ -130,7 +130,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			return
 		}
 
-		err = pr.SetBodyWithState(ctx, post.ID, update.Message.Text, models2.POST_STATUS_PUBLISHED)
+		err = pr.SetBodyWithState(ctx, post.ID, update.Message.Text, models2.POST_STATUS_MODERATION)
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to set post body, with error: %v", err)
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -160,10 +160,10 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   services.Translate("Published"),
+			Text:   services.Translate("Sent to moderation"),
 		})
 
 		ts := services.GetTelegramService()
-		go ts.PublishPost(post)
+		ts.NotifyAdmin(fmt.Sprintf("New post added to moderation [from %s]: %s", user.TelegramUsername, post.Title))
 	}
 }

@@ -128,3 +128,30 @@ func (ts *TelegramService) SendLastPostsToUser(
 
 	return nil
 }
+
+func (ts *TelegramService) NotifyAdmin(msgTxt string) {
+	ur := repositories.GetUserRepository()
+	admin, err := ur.GetUserByTelegramID(ts.cfg.AdminID)
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to retrieve admin, error: %v", err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	ucr := repositories.GetUserChatRepository()
+	uc, err := ucr.GetUserChat(admin.ID, models.CHAT_TYPE_EDITOR, GetEditBotID())
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to retrieve admin chat, error: %v", err)
+		return
+	}
+
+	_, err = ts.editBot.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: uc.ChatID,
+		Text:   msgTxt,
+	})
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to send admin message, error: %v", err)
+	}
+}
