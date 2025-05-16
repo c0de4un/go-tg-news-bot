@@ -78,6 +78,11 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 		return
 	}
 
+	if cmdKey == "2-1" {
+		handleModerationListRequest(ctx, b, mes)
+		return
+	}
+
 	if err != nil {
 		fmt.Printf("onInlineKeyboardSelect: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{

@@ -129,6 +129,20 @@ func (ts *TelegramService) SendLastPostsToUser(
 	return nil
 }
 
+func (ts *TelegramService) SendPost(
+	ctx context.Context,
+	post *models.PostModel,
+	chatID int64,
+) error {
+	msgTxt := ts.renderPost(post)
+	_, err := ts.readBot.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msgTxt,
+	})
+
+	return err
+}
+
 func (ts *TelegramService) NotifyAdmin(msgTxt string) {
 	ur := repositories.GetUserRepository()
 	admin, err := ur.GetUserByTelegramID(ts.cfg.AdminID)
@@ -154,4 +168,8 @@ func (ts *TelegramService) NotifyAdmin(msgTxt string) {
 	if err != nil {
 		fmt.Printf("TelegramService::sendToUser: failed to send admin message, error: %v", err)
 	}
+}
+
+func (ts *TelegramService) renderPost(post *models.PostModel) string {
+	return fmt.Sprintf("%s\n\n%s", post.Title, post.Body)
 }
