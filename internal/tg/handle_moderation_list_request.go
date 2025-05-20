@@ -27,7 +27,7 @@ func handleModerationListRequest(ctx context.Context, b *bot.Bot, mes models.May
 	}
 
 	ts := services.GetTelegramService()
-	err = ts.SendPost(ctx, p, mes.Message.Chat.ID)
+	err = ts.SendPost(ctx, p, mes.Message.Chat.ID, false)
 	if err != nil {
 		fmt.Printf("handleModerationListRequest: failed to render post for admin: %v", err)
 	}

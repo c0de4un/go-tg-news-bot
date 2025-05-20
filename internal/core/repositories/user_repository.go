@@ -41,17 +41,17 @@ func (ur *UserRepository) ListUsers(offset, limit int) ([]*models.UserModel, err
 
 	query := `
         SELECT 
-            id,
-            telegram_username,
-            telegram_id,
-            uuid,
-            created_at,
-            updated_at,
-            role,
+            users.id,
+            users.telegram_username,
+            users.telegram_id,
+            users.uuid,
+            users.created_at,
+            users.updated_at,
+            users.role,
             user_chats.chat_id
         FROM users
-        JOIN user_chats ON user_id = users.id
-        ORDER BY created_at DESC
+        JOIN user_chats ON user_chats.user_id = users.id
+        ORDER BY users.created_at DESC
         OFFSET $1
         LIMIT $2`
 

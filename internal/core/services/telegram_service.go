@@ -61,6 +61,7 @@ func (ts *TelegramService) PublishPost(post *models.PostModel) {
 	var users = make([]*models.UserModel, 0)
 	var err error = nil
 	var duration = time.Duration(1) * time.Second
+	sentUsers := make(map[int64]bool)
 	for {
 		users, err = ur.ListUsers(offset, 100)
 		offset = offset + 100
@@ -74,7 +75,12 @@ func (ts *TelegramService) PublishPost(post *models.PostModel) {
 		}
 
 		for _, user := range users {
+			if sentUsers[user.ID] {
+				continue
+			}
+
 			_ = ts.sendToUser(user, msgTxt)
+			sentUsers[user.ID] = true
 
 			duration = time.Duration(1+rand.Intn(29)) * time.Second
 			time.Sleep(duration)
@@ -133,9 +139,17 @@ func (ts *TelegramService) SendPost(
 	ctx context.Context,
 	post *models.PostModel,
 	chatID int64,
+	isReader bool,
 ) error {
 	msgTxt := ts.renderPost(post)
-	_, err := ts.readBot.SendMessage(ctx, &bot.SendMessageParams{
+	var b *bot.Bot = nil
+	if isReader {
+		b = ts.readBot
+	} else {
+		b = ts.editBot
+	}
+
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: chatID,
 		Text:   msgTxt,
 	})

@@ -16,6 +16,16 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 	dataParts := strings.Split(string(data), ";")
 	cmdKey := dataParts[0]
 
+	if cmdKey == "2-1" {
+		handleModerationListRequest(ctx, b, mes)
+		return
+	}
+
+	if cmdKey == "2-3" {
+		handleModerationPublishRequest(ctx, b, mes, dataParts)
+		return
+	}
+
 	chatId := mes.Message.Chat.ID
 	userId, err := strconv.ParseInt(dataParts[1], 10, 64)
 	if err != nil {
@@ -75,11 +85,6 @@ func onInlineKeyboardSelect(ctx context.Context, b *bot.Bot, mes models.MaybeIna
 
 	if cmdKey == "1-1" {
 		handlePostCreateStart(user, uc, c, ctx, b, mes)
-		return
-	}
-
-	if cmdKey == "2-1" {
-		handleModerationListRequest(ctx, b, mes)
 		return
 	}
 

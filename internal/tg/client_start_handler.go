@@ -129,7 +129,7 @@ func ClientStartHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		Row().
 		Button(services.Translate("Create post"), []byte(fmt.Sprintf("1-1;%d", userId)), onInlineKeyboardSelect)
 
-	if ts.IsAdmin(user.ID) {
+	if ts.IsAdmin(user.TelegramID) {
 		kb = kb.Row().
 			Button(services.Translate("Moderate"), []byte(fmt.Sprintf("2-1;%d", userId)), onInlineKeyboardSelect)
 	}
