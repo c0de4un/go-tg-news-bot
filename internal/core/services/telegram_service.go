@@ -52,10 +52,10 @@ func (ts *TelegramService) IsAdmin(tgID int64) bool {
 	return tgID == ts.cfg.AdminID
 }
 
-func (ts *TelegramService) PublishPost(post *models.PostModel) {
+func (ts *TelegramService) PublishForwardPost(post *models.ForwardPostModel) {
 	ur := repositories.GetUserRepository()
-
-	msgTxt := fmt.Sprintf("%s\n\n%s", post.Title, post.Body)
+	ucr := repositories.GetUserChatRepository()
+	ctx := context.Background()
 
 	offset := 0
 	var users = make([]*models.UserModel, 0)
@@ -66,7 +66,7 @@ func (ts *TelegramService) PublishPost(post *models.PostModel) {
 		users, err = ur.ListUsers(offset, 100)
 		offset = offset + 100
 		if err != nil {
-			fmt.Printf("TelegramService.PublishPost: %v", err)
+			fmt.Printf("TelegramService.PublishForwardPost: %v", err)
 			return
 		}
 
@@ -79,7 +79,23 @@ func (ts *TelegramService) PublishPost(post *models.PostModel) {
 				continue
 			}
 
-			_ = ts.sendToUser(user, msgTxt)
+			uc, err := ucr.GetUserChat(user.ID, models.CHAT_TYPE_READER, GetReadBotID())
+			if err != nil || uc == nil {
+				fmt.Printf("\nTelegramService::PublishForwardPost: failed to find user-chat, error: %v\n", err)
+				continue
+			}
+
+			_, err = ts.editBot.CopyMessage(ctx, &bot.CopyMessageParams{
+				ChatID:     ts.cfg.ChannelID,
+				FromChatID: post.FromChatID,
+				MessageID:  int(post.TelegramID),
+			})
+
+			if err != nil {
+				fmt.Printf("\nTelegramService::PublishForwardPost: failed to send post for a user %d, error: %v\n", user.ID, err)
+				continue
+			}
+
 			sentUsers[user.ID] = true
 
 			duration = time.Duration(1+rand.Intn(29)) * time.Second
@@ -133,6 +149,33 @@ func (ts *TelegramService) SendLastPostsToUser(
 	}
 
 	return nil
+}
+
+func (ts *TelegramService) SendForwardPost(
+	post *models.ForwardPostModel,
+	chatID int64,
+	isReader bool,
+) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var b *bot.Bot = nil
+	if isReader {
+		b = ts.readBot
+	} else {
+		b = ts.editBot
+	}
+
+	_, err := b.ForwardMessage(ctx, &bot.ForwardMessageParams{
+		ChatID:     chatID,
+		FromChatID: post.FromChatID,
+		MessageID:  int(post.TelegramID),
+	})
+	if err != nil {
+		fmt.Printf("\nTelegramService::SendForwardPost: failed to forward message, error: %v\n", err)
+	}
+
+	return err
 }
 
 func (ts *TelegramService) SendPost(

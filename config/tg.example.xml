@@ -5,4 +5,5 @@
     <ReaderToken>TOKEN</ReaderToken>
     <ReaderBotID>12345678</ReaderBotID>
     <AdminID>12345678</AdminID>
+    <ChannelID>@my_channel</ChannelID>
 </TelegramConfig>

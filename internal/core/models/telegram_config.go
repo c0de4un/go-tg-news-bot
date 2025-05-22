@@ -14,6 +14,7 @@ type TelegramConfig struct {
 	ReaderToken string   `xml:"ReaderToken"`
 	ReaderBotID int64    `xml:"ReaderBotID"`
 	AdminID     int64    `xml:"AdminID"`
+	ChannelID   string   `xml:"ChannelID"`
 }
 
 func LoadTelegramConfig() (*TelegramConfig, error) {

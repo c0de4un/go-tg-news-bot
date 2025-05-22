@@ -3,6 +3,7 @@
 CREATE TABLE IF NOT EXISTS forward_posts (
     id BIGSERIAL PRIMARY KEY,
     telegram_id BIGSERIAL,
+    from_chat_id BIGSERIAL,
     status SMALLINT NOT NULL DEFAULT 0,
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

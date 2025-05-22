@@ -12,6 +12,9 @@ import (
 
 func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	ur := repositories.GetUserRepository()
+	if ur == nil {
+		panic("GetUserRepository returned nil")
+	}
 	user, err := ur.GetUserWithRelations(update.Message.From.ID, models2.CHAT_TYPE_EDITOR, services.GetEditBotID())
 	if err != nil {
 		fmt.Printf("DefaultHandler: failed to retrieve user with error %v", err)
@@ -34,21 +37,8 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	// Forward-Post Input
 	if user.Chat.State == models2.CHAT_STATE_FORWARDED_POST_INPUT {
-		ln := len(update.Message.Text)
-		if ln < 3 || ln > 254 {
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Invalid content"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
 		fr := repositories.GetForwardPostRepository()
-		fwdPost, err := fr.Create(user.ID, int64(update.Message.ID))
+		fwdPost, err := fr.Create(user.ID, int64(update.Message.ID), update.Message.Chat.ID)
 		if err != nil {
 			fmt.Printf("DefaultHandler: failed to create forwarded message with %v", err)
 		}
