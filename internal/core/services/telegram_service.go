@@ -158,11 +158,8 @@ func (ts *TelegramService) SendPost(
 }
 
 func (ts *TelegramService) NotifyAdminAboutNewPost(
-	user *models.UserModel,
 	fwdPost *models.ForwardPostModel,
 ) {
-	// @TODO: Refactor TelegramService.NotifyAdminAboutNewPost()
-	msgTxt := fmt.Sprintf("New post added to moderation [from %s]", user.TelegramUsername)
 	ur := repositories.GetUserRepository()
 	admin, err := ur.GetUserByTelegramID(ts.cfg.AdminID)
 	if err != nil {
@@ -180,12 +177,13 @@ func (ts *TelegramService) NotifyAdminAboutNewPost(
 		return
 	}
 
-	_, err = ts.editBot.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: uc.ChatID,
-		Text:   msgTxt,
+	_, err = ts.editBot.ForwardMessage(ctx, &bot.ForwardMessageParams{
+		ChatID:     uc.ChatID,
+		FromChatID: uc.ChatID,
+		MessageID:  int(fwdPost.TelegramID),
 	})
 	if err != nil {
-		fmt.Printf("TelegramService::sendToUser: failed to send admin message, error: %v", err)
+		fmt.Printf("\nTelegramService::sendToUser: failed to forward message to admin, error: %v\n", err)
 	}
 }
 
