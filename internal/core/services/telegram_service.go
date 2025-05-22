@@ -157,7 +157,12 @@ func (ts *TelegramService) SendPost(
 	return err
 }
 
-func (ts *TelegramService) NotifyAdmin(msgTxt string) {
+func (ts *TelegramService) NotifyAdminAboutNewPost(
+	user *models.UserModel,
+	fwdPost *models.ForwardPostModel,
+) {
+	// @TODO: Refactor TelegramService.NotifyAdminAboutNewPost()
+	msgTxt := fmt.Sprintf("New post added to moderation [from %s]", user.TelegramUsername)
 	ur := repositories.GetUserRepository()
 	admin, err := ur.GetUserByTelegramID(ts.cfg.AdminID)
 	if err != nil {

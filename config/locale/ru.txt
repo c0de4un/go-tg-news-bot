@@ -30,3 +30,5 @@
 "В процессе . . ."
 "Completed"
 "Готово"
+"Enter post content. Images and other media are supported"
+"Введите содержимое. Изображения и другое медиа поддерживается"

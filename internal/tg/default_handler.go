@@ -48,77 +48,10 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	// Title prompt
-	if user.Chat.State == models2.CHAT_STATE_POST_TITLE {
+	// Forward-Post Input
+	if user.Chat.State == models2.CHAT_STATE_FORWARDED_POST_INPUT {
 		ln := len(update.Message.Text)
 		if ln < 3 || ln > 254 {
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Invalid title"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
-		post, err := pr.Create(ctx, user.ID)
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to create new post, with error: %v", err)
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Failed, try again later"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
-		err = pr.SetTitle(ctx, post.ID, update.Message.Text)
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Failed, try again later"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
-		err = ucr.SetState(ctx, user.Chat.ID, models2.CHAT_STATE_POST_BODY)
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Failed, try again later"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   services.Translate("Enter main text"),
-		})
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-		}
-
-		return
-	}
-
-	if user.Chat.State == models2.CHAT_STATE_POST_BODY {
-		ln := len(update.Message.Text)
-		if ln < 3 || ln > 10000 {
 			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 				ChatID: update.Message.Chat.ID,
 				Text:   services.Translate("Invalid content"),
@@ -130,40 +63,23 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			return
 		}
 
-		err = pr.SetBodyWithState(ctx, post.ID, update.Message.Text, models2.POST_STATUS_MODERATION)
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to set post body, with error: %v", err)
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Failed, try again later"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
+		// @TODO: Store message and chat id as Forward-Post
+		// @TODO: #1 Get ForwardPostRepository
+		// @TODO: #2 Create ForwardPost
+		ts := services.GetTelegramService()
+		ts.NotifyAdminAboutNewPost(
+			user,
+			fwdPost,
+		)
 
-			return
-		}
-
-		err = ucr.SetState(ctx, user.Chat.ID, models2.CHAT_STATE_POST_WELCOME)
-		if err != nil {
-			fmt.Printf("DefaultHandler: failed to set chat state, with error: %v", err)
-			_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   services.Translate("Failed, try again later"),
-			})
-			if err != nil {
-				fmt.Printf("DefaultHandler: failed to send error message with %v", err)
-			}
-
-			return
-		}
-
-		_, _ = b.SendMessage(ctx, &bot.SendMessageParams{
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   services.Translate("Sent to moderation"),
 		})
+		if err != nil {
+			fmt.Printf("DefaultHandler: failed to send message with %v", err)
+		}
 
-		ts := services.GetTelegramService()
-		ts.NotifyAdmin(fmt.Sprintf("New post added to moderation [from %s]: %s", user.TelegramUsername, post.Title))
+		return
 	}
 }
