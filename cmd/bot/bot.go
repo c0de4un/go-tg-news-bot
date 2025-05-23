@@ -32,6 +32,7 @@ func main() {
 	repositories.InitializeClientRepository()
 	repositories.InitializePostRepository()
 	services.InitializeTranslateService()
+	repositories.InitForwardPostRepository()
 
 	opts := []bot.Option{
 		bot.WithDefaultHandler(tg.DefaultHandler),

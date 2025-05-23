@@ -52,20 +52,21 @@ func (ts *TelegramService) IsAdmin(tgID int64) bool {
 	return tgID == ts.cfg.AdminID
 }
 
-func (ts *TelegramService) PublishPost(post *models.PostModel) {
+func (ts *TelegramService) PublishForwardPost(post *models.ForwardPostModel) {
 	ur := repositories.GetUserRepository()
-
-	msgTxt := fmt.Sprintf("%s\n\n%s", post.Title, post.Body)
+	ucr := repositories.GetUserChatRepository()
+	ctx := context.Background()
 
 	offset := 0
 	var users = make([]*models.UserModel, 0)
 	var err error = nil
 	var duration = time.Duration(1) * time.Second
+	sentUsers := make(map[int64]bool)
 	for {
 		users, err = ur.ListUsers(offset, 100)
 		offset = offset + 100
 		if err != nil {
-			fmt.Printf("TelegramService.PublishPost: %v", err)
+			fmt.Printf("TelegramService.PublishForwardPost: %v", err)
 			return
 		}
 
@@ -74,7 +75,28 @@ func (ts *TelegramService) PublishPost(post *models.PostModel) {
 		}
 
 		for _, user := range users {
-			_ = ts.sendToUser(user, msgTxt)
+			if sentUsers[user.ID] {
+				continue
+			}
+
+			uc, err := ucr.GetUserChat(user.ID, models.CHAT_TYPE_READER, GetReadBotID())
+			if err != nil || uc == nil {
+				fmt.Printf("\nTelegramService::PublishForwardPost: failed to find user-chat, error: %v\n", err)
+				continue
+			}
+
+			_, err = ts.editBot.CopyMessage(ctx, &bot.CopyMessageParams{
+				ChatID:     ts.cfg.ChannelID,
+				FromChatID: post.FromChatID,
+				MessageID:  int(post.TelegramID),
+			})
+
+			if err != nil {
+				fmt.Printf("\nTelegramService::PublishForwardPost: failed to send post for a user %d, error: %v\n", user.ID, err)
+				continue
+			}
+
+			sentUsers[user.ID] = true
 
 			duration = time.Duration(1+rand.Intn(29)) * time.Second
 			time.Sleep(duration)
@@ -127,4 +149,87 @@ func (ts *TelegramService) SendLastPostsToUser(
 	}
 
 	return nil
+}
+
+func (ts *TelegramService) SendForwardPost(
+	post *models.ForwardPostModel,
+	chatID int64,
+	isReader bool,
+) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var b *bot.Bot = nil
+	if isReader {
+		b = ts.readBot
+	} else {
+		b = ts.editBot
+	}
+
+	_, err := b.ForwardMessage(ctx, &bot.ForwardMessageParams{
+		ChatID:     chatID,
+		FromChatID: post.FromChatID,
+		MessageID:  int(post.TelegramID),
+	})
+	if err != nil {
+		fmt.Printf("\nTelegramService::SendForwardPost: failed to forward message, error: %v\n", err)
+	}
+
+	return err
+}
+
+func (ts *TelegramService) SendPost(
+	ctx context.Context,
+	post *models.PostModel,
+	chatID int64,
+	isReader bool,
+) error {
+	msgTxt := ts.renderPost(post)
+	var b *bot.Bot = nil
+	if isReader {
+		b = ts.readBot
+	} else {
+		b = ts.editBot
+	}
+
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msgTxt,
+	})
+
+	return err
+}
+
+func (ts *TelegramService) NotifyAdminAboutNewPost(
+	fwdPost *models.ForwardPostModel,
+) {
+	ur := repositories.GetUserRepository()
+	admin, err := ur.GetUserByTelegramID(ts.cfg.AdminID)
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to retrieve admin, error: %v", err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	ucr := repositories.GetUserChatRepository()
+	uc, err := ucr.GetUserChat(admin.ID, models.CHAT_TYPE_EDITOR, GetEditBotID())
+	if err != nil {
+		fmt.Printf("TelegramService::sendToUser: failed to retrieve admin chat, error: %v", err)
+		return
+	}
+
+	_, err = ts.editBot.ForwardMessage(ctx, &bot.ForwardMessageParams{
+		ChatID:     uc.ChatID,
+		FromChatID: uc.ChatID,
+		MessageID:  int(fwdPost.TelegramID),
+	})
+	if err != nil {
+		fmt.Printf("\nTelegramService::sendToUser: failed to forward message to admin, error: %v\n", err)
+	}
+}
+
+func (ts *TelegramService) renderPost(post *models.PostModel) string {
+	return fmt.Sprintf("%s\n\n%s", post.Title, post.Body)
 }

@@ -12,7 +12,7 @@ import (
 
 func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel, c *newsmodels.ClientModel, ctx context.Context, b *bot.Bot, mes models.MaybeInaccessibleMessage) {
 	ucr := repositories.GetUserChatRepository()
-	err := ucr.SetState(ctx, uc.ID, newsmodels.CHAT_STATE_POST_TITLE)
+	err := ucr.SetState(ctx, uc.ID, newsmodels.CHAT_STATE_FORWARDED_POST_INPUT)
 	if err != nil {
 		fmt.Printf("handlePostCreateStart: %v", err)
 		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
@@ -28,7 +28,7 @@ func handlePostCreateStart(user *newsmodels.UserModel, uc *newsmodels.ChatModel,
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: mes.Message.Chat.ID,
-		Text:   services.Translate("Please, enter post title"),
+		Text:   services.Translate("Enter post content. Images and other media are supported"),
 	})
 	if err != nil {
 		fmt.Printf("handlePostCreateStart: %v", err)

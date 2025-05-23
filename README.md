@@ -42,5 +42,5 @@ goose -dir db/migrations postgres "postgresql://postgres:password@127.0.0.1:5432
 
 To rollback, use command:
 ```sh
-goose -dir /db/migrations postgres "postgresql://goose:password@127.0.0.1:5432/go_migrations?sslmode=disable" down-to <VERSION>
+goose -dir db/migrations postgres "postgresql://postgres:password@127.0.0.1:5432/newsbot?sslmode=disable" down
 ```
