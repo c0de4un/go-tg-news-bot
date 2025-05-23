@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/go-telegram/ui/keyboard/inline"
 	newsmodels "gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/models"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/repositories"
 	"gitlab.com/korgi.tech/projects/go-news-tg-bot/internal/core/services"
@@ -50,5 +51,25 @@ func handleModerationPublishRequest(ctx context.Context, b *bot.Bot, mes models.
 	})
 	if err != nil {
 		fmt.Printf("handleModerationPublishRequest: %v", err)
+	}
+
+	ur := repositories.GetUserRepository()
+	user, err := ur.GetUserByTelegramID(mes.Message.From.ID)
+	if err != nil {
+		fmt.Printf("handleModerationPublishRequest: %v", err)
+		return
+	}
+
+	if user != nil {
+		kb := inline.New(b).
+			Row().
+			Button(services.Translate("Create post"), []byte(fmt.Sprintf("1-1;%d", user.ID)), onInlineKeyboardSelect).
+			Button(services.Translate("Moderate"), []byte(fmt.Sprintf("2-1;%d", user.ID)), onInlineKeyboardSelect)
+
+		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:      mes.Message.Chat.ID,
+			Text:        services.Translate("Menu"),
+			ReplyMarkup: kb,
+		})
 	}
 }
