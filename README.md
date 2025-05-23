@@ -44,3 +44,11 @@ To rollback, use command:
 ```sh
 goose -dir db/migrations postgres "postgresql://postgres:password@127.0.0.1:5432/newsbot?sslmode=disable" down
 ```
+
+Screenshots:
+![1](data/media/tg_bot_1.jpg)
+![2](data/media/tg_bot_2.jpg)
+![3](data/media/tg_bot_3.jpg)
+![4](data/media/tg_bot_4.jpg)
+![5](data/media/tg_bot_5.jpg)
+![6](data/media/tg_bot_6.jpg)
